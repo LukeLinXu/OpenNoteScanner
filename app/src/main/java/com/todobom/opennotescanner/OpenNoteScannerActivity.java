@@ -50,7 +50,6 @@ import android.widget.Toast;
 
 import com.github.fafaldo.fabtoolbar.widget.FABToolbarLayout;
 import com.todobom.opennotescanner.helpers.AboutFragment;
-import com.todobom.opennotescanner.helpers.CustomOpenCVLoader;
 import com.todobom.opennotescanner.helpers.OpenNoteMessage;
 import com.todobom.opennotescanner.helpers.PreviewFrame;
 import com.todobom.opennotescanner.helpers.ScannedDocument;
@@ -525,7 +524,13 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
         checkCreatePermissions();
 
-        CustomOpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_1_0, this, mLoaderCallback);
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
 
         if (mImageThread == null ) {
             mImageThread = new HandlerThread("Worker Thread");
