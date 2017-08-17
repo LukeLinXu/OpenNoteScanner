@@ -492,17 +492,27 @@ public class ImageProcessor extends Handler {
         cannedImage = new Mat(size, CvType.CV_8UC1);
 
         Imgproc.resize(src,resizedImage,size);
-        Imgproc.cvtColor(resizedImage, grayImage, Imgproc.COLOR_RGBA2GRAY, 4);
-        Imgproc.GaussianBlur(grayImage, grayImage, new Size(5, 5), 0);
-        Imgproc.Canny(grayImage, cannedImage, 75, 200);
+//        Imgproc.cvtColor(resizedImage, grayImage, Imgproc.COLOR_RGBA2GRAY, 4);
+//        Imgproc.GaussianBlur(grayImage, grayImage, new Size(5, 5), 0);
+        Imgproc.Canny(resizedImage, cannedImage, 25, 75);
 
         ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Mat hierarchy = new Mat();
 
-        Imgproc.findContours(cannedImage, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(cannedImage, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         hierarchy.release();
 
+
+        ArrayList<MatOfPoint> contours1 = new ArrayList<MatOfPoint>();
+        Mat hierarchy1 = new Mat();
+        Mat closed = new Mat();
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+        Imgproc.morphologyEx(cannedImage, closed, Imgproc.MORPH_CLOSE, kernel);
+        Imgproc.findContours(closed, contours1, hierarchy1, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        hierarchy1.release();
+        contours.addAll(contours1);
         Collections.sort(contours, new Comparator<MatOfPoint>() {
 
             @Override
